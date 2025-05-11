@@ -2,13 +2,13 @@
 
 public class SimpleOrderFilter
 {
-    public int? IdOrder { get; set; }
+    public int? IdProduct { get; set; }
     public DateTime? CreatedAt { get; set; }
     public int? Amount { get; set; }
 
-    public SimpleOrderFilter(int? idOrder = null, DateTime? createdAt = null, int? amount = null)
+    public SimpleOrderFilter(int? idProduct = null, DateTime? createdAt = null, int? amount = null)
     {
-        IdOrder = idOrder;
+        IdProduct = idProduct;
         CreatedAt = createdAt;
         Amount = amount;
     }

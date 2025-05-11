@@ -5,14 +5,14 @@ using Tutorial9.Model;
 
 namespace Tutorial9.Repositories;
 
-public class OrderRepository
+public class OrderRepository : IOrderRepository
 {
     
     private readonly string _connectionString;
     
     public OrderRepository(IConfiguration configuration)
     {
-        _connectionString = configuration.GetConnectionString("DefaultConnection");
+        _connectionString = configuration.GetConnectionString("Default");
     }
 
     public async Task<List<Order>> GetOrdersAsync(CancellationToken ct, SimpleOrderFilter filter)
@@ -24,8 +24,7 @@ public class OrderRepository
         command.Connection = connection;
         await connection.OpenAsync(ct);
 
-        command.CommandText = @"SELECT * FROM Order 
-                                WHERE 1 = 1";
+        command.CommandText = "SELECT * FROM \"Order\" WHERE 1 = 1";
 
         if (filter.CreatedAt != null)
         {
@@ -33,10 +32,10 @@ public class OrderRepository
             command.Parameters.AddWithValue("@CreatedAt", filter.CreatedAt);
         }
 
-        if (filter.IdOrder != null)
+        if (filter.IdProduct != null)
         {
             command.CommandText += " AND IdOrder = @IdOrder";
-            command.Parameters.AddWithValue("@IdOrder", filter.IdOrder);
+            command.Parameters.AddWithValue("@IdOrder", filter.IdProduct);
         }
 
         if (filter.Amount != null)
@@ -67,7 +66,7 @@ public class OrderRepository
     
     public async Task<int> FullfillOrderAsync(CancellationToken ct, ProductWarehouseRecord productWarehouseRecord)
     {
-        string query = "UPDATE Order SET FulfilledAt = @FulfilledAt WHERE IdOrder = @IdOrder";
+        string query = "UPDATE \"Order\" SET FulfilledAt = @FulfilledAt WHERE IdOrder = @IdOrder";
         
         await using SqlConnection connection = new SqlConnection(_connectionString);
         await connection.OpenAsync(ct);
@@ -107,6 +106,7 @@ public class OrderRepository
             
             int idProductWarehouse = (int)await command.ExecuteScalarAsync(ct);
             
+            await transaction.CommitAsync(ct);
             return idProductWarehouse;
         }
         catch (Exception)

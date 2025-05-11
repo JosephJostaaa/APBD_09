@@ -2,13 +2,13 @@
 
 namespace Tutorial9.Repositories;
 
-public class WarehouseRepository
+public class WarehouseRepository : IWarehouseRepository
 {
     private readonly string connectionString;
     
     public WarehouseRepository(IConfiguration configuration)
     {
-        connectionString = configuration.GetConnectionString("DefaultConnection");
+        connectionString = configuration.GetConnectionString("Default");
     }
 
     public async Task<bool> ExistsByIdAsync(CancellationToken cancellationToken, int id)

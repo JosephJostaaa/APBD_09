@@ -2,14 +2,14 @@
 
 namespace Tutorial9.Repositories;
 
-public class ProductRepository
+public class ProductRepository : IProductRepository
 {
     
     private readonly string connectionString;
     
     public ProductRepository(IConfiguration configuration)
     {
-        connectionString = configuration.GetConnectionString("DefaultConnection");
+        connectionString = configuration.GetConnectionString("Default");
     }
 
     public async Task<bool> ExistsByIdAsync(CancellationToken cancellationToken, int id)
@@ -31,7 +31,7 @@ public class ProductRepository
         
     }
 
-    public async Task<double> GetProductPriceByIdAsync(CancellationToken cancellationToken, int id)
+    public async Task<Decimal> GetProductPriceByIdAsync(CancellationToken cancellationToken, int id)
     {
         string query = "SELECT Price FROM Product WHERE IdProduct = @id";
         
@@ -43,6 +43,6 @@ public class ProductRepository
         
         await connection.OpenAsync();
 
-        return  (double)await command.ExecuteScalarAsync(cancellationToken);
+        return  (decimal)await command.ExecuteScalarAsync(cancellationToken);
     }
 }
