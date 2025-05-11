@@ -1,4 +1,5 @@
-﻿using System.Data.Common;
+﻿using System.Data;
+using System.Data.Common;
 using Microsoft.Data.SqlClient;
 using Tutorial9.Dto;
 using Tutorial9.Model;
@@ -9,6 +10,7 @@ public class OrderRepository : IOrderRepository
 {
     
     private readonly string _connectionString;
+    private readonly string _orderFulfillProcedure = "AddProductToWarehouse";
     
     public OrderRepository(IConfiguration configuration)
     {
@@ -112,6 +114,38 @@ public class OrderRepository : IOrderRepository
         catch (Exception)
         {
             await transaction.RollbackAsync(ct);
+            throw;
+        }
+    }
+
+
+    public async Task<int> FulfillOrderProcedurallyAsync(CancellationToken ct, int idWarehouse, int idProduct, int amount, DateTime createdAt)
+    {
+        try
+        {
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                await connection.OpenAsync(ct);
+
+                using (var command = new SqlCommand(_orderFulfillProcedure, connection))
+                {
+                    command.CommandType = CommandType.StoredProcedure;
+
+                
+                
+                    command.Parameters.AddWithValue("@IdWarehouse", idWarehouse);
+                    command.Parameters.AddWithValue("@IdProduct", idProduct);
+                    command.Parameters.AddWithValue("@Amount", amount);
+                    command.Parameters.AddWithValue("@CreatedAt", createdAt);
+
+                
+                    return (int)await command.ExecuteScalarAsync(ct);
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
             throw;
         }
     }

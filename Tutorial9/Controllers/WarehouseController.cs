@@ -22,5 +22,11 @@ public class WarehouseController : ControllerBase
         return Ok(result);
     }
     
+    [HttpPost("fulfill/procedure")]
+    public async Task<IActionResult> FulfillOrderWithProcedureAsync([FromBody] ProductWarehouseDto productWarehouseDto, CancellationToken ct)
+    {
+        var result = await _warehouseService.FulfillOrderWithProcedureAsync(ct, productWarehouseDto);
+        return Ok(result);
+    }
     
 }

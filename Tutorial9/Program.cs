@@ -1,3 +1,4 @@
+using Tutorial9.ExceptionHandler;
 using Tutorial9.Repositories;
 using Tutorial9.Services;
 
@@ -25,7 +26,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseAuthorization();
-
+app.UseMiddleware<ExceptionHandlerMiddleware>();
 app.MapControllers();
 
 app.Run();

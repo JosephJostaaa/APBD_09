@@ -1,4 +1,5 @@
 ﻿using Tutorial9.Dto;
+using Tutorial9.Exceptions;
 using Tutorial9.Mappers;
 using Tutorial9.Model;
 using Tutorial9.Repositories;
@@ -24,10 +25,10 @@ public class WarehouseService : IWarehouseService
     public async Task<int> FulfillOrderAsync(CancellationToken ct, ProductWarehouseDto productWarehouseDto)
     {
         if (!await productRepository.ExistsByIdAsync(ct, productWarehouseDto.IdProduct))
-            throw new ArgumentException($"Product with id {productWarehouseDto.IdProduct} does not exist");
+            throw new NotFoundException($"Product with id {productWarehouseDto.IdProduct} does not exist");
         
         if (!await warehouseRepository.ExistsByIdAsync(ct, productWarehouseDto.IdWarehouse))
-            throw new ArgumentException($"Warehouse with id {productWarehouseDto.IdWarehouse} does not exist");
+            throw new NotFoundException($"Warehouse with id {productWarehouseDto.IdWarehouse} does not exist");
         
         var filter = new SimpleOrderFilter();
         filter.Amount = productWarehouseDto.Amount;
@@ -38,7 +39,7 @@ public class WarehouseService : IWarehouseService
         List<Order> orders = await orderRepository.GetOrdersAsync(ct, new SimpleOrderFilter());
         
         if (!orders.Any())
-            throw new ArgumentException($"Order with id {productWarehouseDto.IdProduct} does not exist");
+            throw new NotFoundException($"Order with id {productWarehouseDto.IdProduct} does not exist");
         
         Order order = orders.First();
 
@@ -49,5 +50,10 @@ public class WarehouseService : IWarehouseService
         
         Decimal totalPrice = productPrice * productWarehouseDto.Amount;
         return await orderRepository.FullfillOrderAsync(ct, ProductWarehouseMapper.ToProductWarehouseRecord(productWarehouseDto, totalPrice, DateTime.UtcNow, order.IdOrder));
+    }
+
+    public async Task<int> FulfillOrderWithProcedureAsync(CancellationToken ct, ProductWarehouseDto productWarehouseDto)
+    {
+        return await orderRepository.FulfillOrderProcedurallyAsync(ct, productWarehouseDto.IdWarehouse, productWarehouseDto.IdProduct, productWarehouseDto.Amount, productWarehouseDto.CreatedAt);
     }
 }
